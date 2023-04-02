@@ -1,11 +1,36 @@
 {% include 'task/header.html' %}
 <body>
+<div class="container text-center mx-auto mt-3">
+    {% for _ in tasks %}
+    <form class="form-inline" action="{{ url_for('delete_task') }}" method="POST">
+        <div class="row">
+            <div class="col-lg-1 col-md-1 col-sm-1 fs-4 fw-bold text-right mt-2">
+                <input name="id" type="text" class="form-control-plaintext text-light bg-secondary" id="id" value="{{ _['task_id']}}" readonly>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2 fs-4 fw-bold text-right mt-2">
+                <input name="taskname" type="text" class="form-control-plaintext text-light bg-secondary" id="taskName" value="{{ _['name'] }}">
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold text-right mt-2">
+                <input name="taskdesc" type="text" class="form-control-plaintext text-light bg-secondary" id="taskDesc" value="{{ _['description'] }}">
+            </div>
+            <div class="col-lg-1">
+            <button class="btn mt-2" id="delete" type="submit">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+            </div>
+        </div>
+    </form>
+    {% endfor %}
+</div>
 <div class="container text-center">
+
+
     <form id="userData" action="{{ url_for('logout_page') }}" method="GET">
         <div class="col-lg-5 mx-auto mt-3 ">
             <button class="btn btn-primary text-uppercase btn-light w-50 fs-5 fw-bold" id="logOut" type="submit">Logout</button>
         </div>
     </form>
+
 </div>
 </body>
 {% include 'task/footer.html'%}

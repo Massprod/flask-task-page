@@ -17,7 +17,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database/database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["TESTING"] = False
 
-
 Base.metadata.create_all(engine)
 
 
@@ -67,6 +66,7 @@ def register_page():
     elif request.method == "POST":
         db = next(get_session())
         data = request.form
+        print(data)
         register = requests.post(f"{api_base}user/new",
                                  json={"login": data["username"],
                                        "password": data["password"],
@@ -85,14 +85,27 @@ def register_page():
     return render_template("login/register.html")
 
 
-@app.route("/task", methods=["GET", "POST", "DELETE", "PUT"])
+@app.route("/task", methods=["GET"])
 @login_required
 def task_page():
-    print(current_user)
-    print(current_user.id)
-    print(login_fresh())
-    print(login_remembered())
-    return render_template("task/test.html")
+    token = current_user.token
+    print(token)
+    tasks = requests.get(f"{api_base}task/all",
+                         headers={"Authorization": f"Bearer {token}"},
+                         )
+    return render_template("task/test.html", tasks=tasks.json()["user_tasks"])
+
+
+@app.route("/task/delete", methods=["POST"])
+@login_required
+def delete_task():
+    task_id = request.form["id"]
+    print(request.form['taskname'])
+    token = current_user.token
+    requests.delete(f"{api_base}task/{task_id}",
+                    headers={"Authorization": f"Bearer {token}"},
+                    )
+    return redirect(url_for('task_page'))
 
 
 @app.route("/logout")
