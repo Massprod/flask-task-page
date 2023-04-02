@@ -1,16 +1,22 @@
 from flask import Flask, render_template, request, url_for, redirect
-from flask_login import LoginManager, login_user, current_user, login_required, logout_user
+from flask_login import LoginManager, login_user, current_user, \
+    login_required, logout_user, login_fresh, login_remembered, user_logged_out
 from database.models import Users
 from database.database import Base, engine, get_session
 import requests
+from datetime import timedelta
 
 app = Flask(__name__)
 app.secret_key = "VerySecretKek!2VerySecretKek"
 
 api_base = "http://localhost:5000/"
 login_manager = LoginManager(app=app)
+login_manager.login_view = "login_page"
+login_manager.refresh_view = "login_page"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database/database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["TESTING"] = False
+
 
 Base.metadata.create_all(engine)
 
@@ -18,12 +24,14 @@ Base.metadata.create_all(engine)
 @login_manager.user_loader
 def user_loader(id):
     db = next(get_session())
-    return db.get(Users, id)
+    return db.query(Users).filter_by(id=id).first()
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login_page():
-    if request.method == "POST":
+    if current_user.is_authenticated:
+        return redirect(url_for("task_page"))
+    elif request.method == "POST":
         db = next(get_session())
         data = request.form
         login = requests.post(f"{api_base}token",
@@ -42,20 +50,21 @@ def login_page():
             )
             db.commit()
             update = db.query(Users).filter_by(id=user_id).first()
-            login_user(update)
-            return render_template("task/test.html", token=token)
+            login_user(update, remember=True, duration=timedelta(minutes=1))
+            return redirect(url_for("task_page"))
         elif login.status_code == 404:
             return render_template("login/login.html", name_inc=True)
         elif login.status_code == 403:
             return render_template("login/login.html", pass_inc=True)
     print(current_user)
-    print(current_user.is_active)
     return render_template("login/login.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register_page():
-    if request.method == "POST":
+    if current_user.is_authenticated:
+        return redirect(url_for("task_page"))
+    elif request.method == "POST":
         db = next(get_session())
         data = request.form
         register = requests.post(f"{api_base}user/new",
@@ -76,8 +85,18 @@ def register_page():
     return render_template("login/register.html")
 
 
+@app.route("/task", methods=["GET", "POST", "DELETE", "PUT"])
 @login_required
+def task_page():
+    print(current_user)
+    print(current_user.id)
+    print(login_fresh())
+    print(login_remembered())
+    return render_template("task/test.html")
+
+
 @app.route("/logout")
+@login_required
 def logout_page():
     logout_user()
     return redirect(url_for("login_page"))
