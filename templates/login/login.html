@@ -2,7 +2,7 @@
 <body>
 <div class="container text-center">
     <form id="userData" action="" method="POST">
-        <div class="col-lg-4 col-md-5 col-sm-5 mx-auto mt-5 pt-5 fs-1 fw-bold">
+        <div class="col-lg-4 col-md-5 col-sm-6 mx-auto mt-5 pt-5 fs-1 fw-bold">
             <label for="username">Username</label>
             {% if name_inc %}
                 <div class="row text-center fw-bold text-warning">
@@ -11,7 +11,7 @@
             {% endif %}
             <input name="username" type="text" class="form-control fs-5" id="username" placeholder="Username" pattern="^[A-Za-z\d]{2,50}$" title="Eng-only. 2-50chars" value="{{ username }}" required>
         </div>
-        <div class="col-lg-4 col-md-5 col-sm-5 mx-auto mt-2 fs-1 fw-bold">
+        <div class="col-lg-4 col-md-5 col-sm-6 mx-auto mt-2 fs-1 fw-bold">
             <label for="password">Password</label>
             {% if pass_inc %}
             <div class="row text-center fw-bold text-warning">
@@ -21,12 +21,12 @@
             <input name="password" type="password" class="form-control fs-5" id="password" placeholder="Password" pattern="^[A-Za-z\d@$!%*#?&]{8,100}$" title="Eng-only. 8-100chars" value="{{ password }}" required>
         </div>
 
-        <div class="col-lg-4 col-md-5 col-sm-6 mx-auto mt-3 ">
+        <div class="col-lg-5 col-md-5 col-sm-8 mx-auto mt-3 ">
             <button class="btn btn-primary text-uppercase btn-light w-50 fs-5 fw-bold" id="signIn" type="submit">Login</button>
         </div>
     </form>
     <form id="register" action="{{ url_for('register_page') }}" method="GET">
-        <div class="col-lg-5 col-md-6 col-sm-6 mx-auto  mt-2 ">
+        <div class="col-lg-5 col-md-6 col-sm-8 mx-auto  mt-2 ">
                 <button class="btn btn-primary text-uppercase btn-light w-50 fs-5 fw-bold" id="signUp" type="submit">Create New</button>
         </div>
     </form>
