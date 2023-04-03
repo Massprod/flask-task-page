@@ -5,29 +5,51 @@
     <form class="form-inline" action="{{ url_for('delete_task', update=True) }}" method="POST">
         <div class="row mx-auto">
             {% if tasks[x]['status'] is true %}
-            <input name="status" class="form-check-input mt-4 bg-dark border-dark" type="checkbox" onchange="this.form.submit()" checked>
-            <input name="status" type="hidden" value="false">
-            {% else %}
-            <input name="status" class="form-check-input mt-4 bg-light border-dark" type="checkbox" value="True" onchange="this.form.submit()">
-            <input name="status" type="hidden" value="False">
-            {% endif %}
             <div class="col-lg-1 col-md-1 col-sm-1 fs-4 fw-bold mt-1">
-                <input type="text" class="form-control-plaintext " value="{{ x + 1 }}" readonly>
-                <input name="id" type="hidden" id="id" value="{{ tasks[x]['task_id'] }}">
+                <input name="status" class="form-check-input mt-3 bg-success border-dark" type="checkbox" onchange="this.form.submit()" checked>
+                <input name="status" type="hidden" value="false">
+            </div>
+            {% else %}
+            <div class="col-lg-1 col-md-1 col-sm-1 fs-4 fw-bold mt-1">
+                <input name="status" class="form-check-input mt-3 bg-light border-dark" type="checkbox" value="True" onchange="this.form.submit()">
+                <input name="status" type="hidden" value="False">
+            </div>
+            {% endif %}
+            {% if tasks[x]['status'] is true %}
+            <div class="col-lg-1 col-md-1 col-sm-1 fs-4 fw-bold mt-1">
+                <input type="text" class="form-control-plaintext" value="# {{ x + 1 }}" style="color: #409b18;" readonly>
+                <input name="id" type="hidden"  value="{{ tasks[x]['task_id'] }}">
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2 fs-4 fw-bold mt-1">
-                <input name="taskname" type="text" class="form-control-plaintext  " id="taskName" value="{{ tasks[x]['name'] }}">
+                <s><input name="taskname" type="text" class="form-control-plaintext  "  value="{{ tasks[x]['name'] }}" readonly></s>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold mt-1">
-                <input name="taskdesc" type="text" class="form-control-plaintext" id="taskDesc" value="{{ tasks[x]['description'] }}">
+                <s><input name="taskdesc" type="text" class="form-control-plaintext" value="{{ tasks[x]['description'] }}" readonly></s>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-1 mt-1 " >
-            <button class="btn" id="delete" type="submit">
+            <button class="btn mt-2 border-light" type="submit" disabled>
                 <i class="fa-sharp fa-solid fa-pen-to-square fa-lg"></i>
             </button>
             </div>
+            {% else %}
+            <div class="col-lg-1 col-md-1 col-sm-1 fs-4 fw-bold mt-1">
+                <input type="text" class="form-control-plaintext " value="# {{ x + 1 }}" readonly>
+                <input name="id" type="hidden" value="{{ tasks[x]['task_id'] }}">
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-2 fs-4 fw-bold mt-1">
+                <input name="taskname" type="text" class="form-control-plaintext  "  value="{{ tasks[x]['name'] }}">
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold mt-1">
+                <input name="taskdesc" type="text" class="form-control-plaintext" value="{{ tasks[x]['description'] }}">
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1 mt-1 " >
+            <button class="btn mt-2" type="submit">
+                <i class="fa-sharp fa-solid fa-pen-to-square fa-lg"></i>
+            </button>
+            </div>
+            {% endif %}
         <div class="col-lg-1 col-md-1 col-sm-1 mt-1 ">
-            <p class="mt-2">
+            <p class="mt-3">
                 <a href="{{ url_for('delete_task', task_id=tasks[x]['task_id']) }}"><i class="fa-sharp fa-solid fa-square-minus fa-lg" style="color: #ffc0cb;"></i></a>
             </p>
         </div>
