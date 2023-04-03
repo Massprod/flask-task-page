@@ -4,7 +4,7 @@ from flask_login import LoginManager, login_user, current_user, \
 from database.models import Users
 from database.database import Base, engine, get_session
 import requests
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 app = Flask(__name__)
 app.secret_key = "VerySecretKek!2VerySecretKek"
@@ -18,6 +18,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["TESTING"] = False
 
 Base.metadata.create_all(engine)
+copy_year = datetime.utcnow().strftime("%Y")
 
 
 @login_manager.user_loader
@@ -56,7 +57,7 @@ def login_page():
         elif login.status_code == 403:
             return render_template("login/login.html", pass_inc=True)
     print(current_user)
-    return render_template("login/login.html")
+    return render_template("login/login.html", copyright=copy_year)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -81,31 +82,45 @@ def register_page():
             db.commit()
             return redirect(url_for("login_page"))
         elif register.status_code == 403:
-            return render_template("login/register.html", taken=data["username"])
-    return render_template("login/register.html")
+            return render_template("login/register.html", taken=data["username"], copyright=copy_year)
+    return render_template("login/register.html", copyright=copy_year)
 
 
 @app.route("/task", methods=["GET"])
 @login_required
 def task_page():
     token = current_user.token
-    print(token)
     tasks = requests.get(f"{api_base}task/all",
                          headers={"Authorization": f"Bearer {token}"},
                          )
-    return render_template("task/test.html", tasks=tasks.json()["user_tasks"])
+    return render_template("task/test.html", tasks=tasks.json()["user_tasks"], copyright=copy_year)
 
 
-@app.route("/task/delete", methods=["POST"])
+@app.route("/task/delete", methods=["GET", "POST"])
 @login_required
 def delete_task():
-    task_id = request.form["id"]
-    print(request.form['taskname'])
     token = current_user.token
-    requests.delete(f"{api_base}task/{task_id}",
-                    headers={"Authorization": f"Bearer {token}"},
-                    )
-    return redirect(url_for('task_page'))
+    if request.method == "GET":
+        task_id = request.args["task_id"]
+        response = requests.delete(f"{api_base}task/{task_id}",
+                                   headers={"Authorization": f"Bearer {token}"},
+                                   )
+        print(response.status_code)
+        return redirect(url_for('task_page'))
+    task_id = request.form["id"]
+    new_name = request.form["taskname"]
+    new_desc = request.form["taskdesc"]
+    new_status = request.form["status"]
+    print(new_status)
+    response = requests.put(f"{api_base}task/{task_id}",
+                            json={"name": new_name,
+                                  "description": new_desc,
+                                  "status": new_status,
+                                  },
+                            headers={"Authorization": f"Bearer {token}"},
+                            )
+    print(response.json())
+    return redirect(url_for("task_page"))
 
 
 @app.route("/logout")
