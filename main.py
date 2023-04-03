@@ -5,10 +5,12 @@ from database.database import Base, engine, get_session
 import requests
 from datetime import timedelta, datetime
 
+api_base = "http://localhost:5000/"
+
 app = Flask(__name__)
 app.secret_key = "VerySecretKek!2VerySecretKek"
 
-api_base = "http://localhost:5000/"
+
 login_manager = LoginManager(app=app)
 login_manager.login_view = "login_page"
 login_manager.refresh_view = "login_page"
@@ -149,4 +151,4 @@ def logout_page():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5050, debug=True)
+    app.run(host="0.0.0.0", port=5050)
