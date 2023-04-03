@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, url_for, redirect
-from flask_login import LoginManager, login_user, current_user, \
-    login_required, logout_user, login_fresh, login_remembered, user_logged_out
+from flask_login import LoginManager, login_user, current_user, login_required, logout_user
 from database.models import Users
 from database.database import Base, engine, get_session
 import requests
@@ -56,7 +55,6 @@ def login_page():
             return render_template("login/login.html", name_inc=True)
         elif login.status_code == 403:
             return render_template("login/login.html", pass_inc=True)
-    print(current_user)
     return render_template("login/login.html", copyright=copy_year)
 
 
@@ -67,7 +65,6 @@ def register_page():
     elif request.method == "POST":
         db = next(get_session())
         data = request.form
-        print(data)
         register = requests.post(f"{api_base}user/new",
                                  json={"login": data["username"],
                                        "password": data["password"],
@@ -93,6 +90,8 @@ def task_page():
     tasks = requests.get(f"{api_base}task/all",
                          headers={"Authorization": f"Bearer {token}"},
                          )
+    if tasks.status_code == 401:
+        return redirect(url_for("login_page"))
     return render_template("task/test.html", tasks=tasks.json()["user_tasks"], copyright=copy_year)
 
 
@@ -105,13 +104,13 @@ def delete_task():
         response = requests.delete(f"{api_base}task/{task_id}",
                                    headers={"Authorization": f"Bearer {token}"},
                                    )
-        print(response.status_code)
+        if response.status_code == 401:
+            return redirect(url_for("login_page"))
         return redirect(url_for('task_page'))
     task_id = request.form["id"]
     new_name = request.form["taskname"]
     new_desc = request.form["taskdesc"]
     new_status = request.form["status"]
-    print(new_status)
     response = requests.put(f"{api_base}task/{task_id}",
                             json={"name": new_name,
                                   "description": new_desc,
@@ -119,7 +118,26 @@ def delete_task():
                                   },
                             headers={"Authorization": f"Bearer {token}"},
                             )
-    print(response.json())
+    if response.status_code == 401:
+        return redirect(url_for("login_page"))
+    return redirect(url_for("task_page"))
+
+
+@app.route("/task/add", methods=["POST"])
+def add_new_task():
+    token = current_user.token
+    task_name = request.form["taskname"]
+    task_desc = request.form["taskdesc"]
+    task_status = False
+    response = requests.post(f"{api_base}task/new",
+                             json={"name": task_name,
+                                   "description": task_desc,
+                                   "status": task_status,
+                                   },
+                             headers={"Authorization": f"Bearer {token}"}
+                             )
+    if response.status_code == 401:
+        return redirect(url_for("login_page"))
     return redirect(url_for("task_page"))
 
 
