@@ -4,28 +4,31 @@ from database.models import Users
 from database.database import Base, engine, get_session
 import requests
 from datetime import timedelta, datetime
+import json
+
 
 api_base = "http://localhost:5000/"
 
 app = Flask(__name__)
-app.secret_key = "VerySecretKek!2VerySecretKek"
-
+app.secret_key = "VerySecret!2VerySecret"
 
 login_manager = LoginManager(app=app)
 login_manager.login_view = "login_page"
 login_manager.refresh_view = "login_page"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database/database.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["TESTING"] = False
 
 Base.metadata.create_all(engine)
-copy_year = datetime.utcnow().strftime("%Y")
+copy_year: str = datetime.utcnow().strftime("%Y")
 
 
 @login_manager.user_loader
 def user_loader(id):
     db = next(get_session())
     return db.query(Users).filter_by(id=id).first()
+
+
+@app.route("/", methods=["GET"])
+def redirect_main():
+    return redirect(url_for("login_page"))
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -42,14 +45,25 @@ def login_page():
                                     }
                               )
         if login.status_code == 200:
-            token = login.json()["access_token"]
-            user_id = int(login.json()["user_id"])
-            db.query(Users).filter_by(id=user_id).update(
-                {
-                    Users.token: token
-                }
-            )
-            db.commit()
+            back_data: json = login.json()
+            token: str = back_data["access_token"]
+            user_id: int = int(back_data["user_id"])
+            user_login: str = back_data["login"]
+            update = db.query(Users).filter_by(id=user_id).first()
+            if update is None:
+                back_user = Users(id=user_id,
+                                  login=user_login,
+                                  token=token,
+                                  )
+                db.add(back_user)
+                db.commit()
+            else:
+                db.query(Users).filter_by(id=user_id).update(
+                    {
+                        Users.token: token
+                    }
+                )
+                db.commit()
             update = db.query(Users).filter_by(id=user_id).first()
             login_user(update, remember=True, duration=timedelta(minutes=1))
             return redirect(url_for("task_page"))
@@ -93,8 +107,9 @@ def task_page():
                          headers={"Authorization": f"Bearer {token}"},
                          )
     if tasks.status_code == 401:
+        logout_user()
         return redirect(url_for("login_page"))
-    return render_template("task/test.html", tasks=tasks.json()["user_tasks"], copyright=copy_year)
+    return render_template("task/task_page.html", tasks=tasks.json()["user_tasks"], copyright=copy_year)
 
 
 @app.route("/task/delete", methods=["GET", "POST"])
@@ -107,6 +122,7 @@ def delete_task():
                                    headers={"Authorization": f"Bearer {token}"},
                                    )
         if response.status_code == 401:
+            logout_user()
             return redirect(url_for("login_page"))
         return redirect(url_for('task_page'))
     task_id = request.form["id"]
@@ -121,6 +137,7 @@ def delete_task():
                             headers={"Authorization": f"Bearer {token}"},
                             )
     if response.status_code == 401:
+        logout_user()
         return redirect(url_for("login_page"))
     return redirect(url_for("task_page"))
 
@@ -139,11 +156,12 @@ def add_new_task():
                              headers={"Authorization": f"Bearer {token}"}
                              )
     if response.status_code == 401:
+        logout_user()
         return redirect(url_for("login_page"))
     return redirect(url_for("task_page"))
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["GET"])
 @login_required
 def logout_page():
     logout_user()
@@ -151,4 +169,4 @@ def logout_page():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5050)
+    app.run(host="0.0.0.0", port=5050, debug=True)
