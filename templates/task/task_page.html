@@ -16,7 +16,7 @@
             {% if tasks[x]['status'] is true %}
             <div class="col-lg-1 col-md-1 col-sm-1 fs-4 fw-bold mt-1">
                 <input name="status" class="form-check-input mt-3 bg-success border-dark" type="checkbox" onchange="this.form.submit()" checked>
-                <input name="status" type="hidden" value="false">
+                <input name="status" type="hidden" value="False">
             </div>
             {% else %}
             <div class="col-lg-1 col-md-1 col-sm-1 fs-4 fw-bold mt-1">
@@ -33,7 +33,7 @@
                 <s><input name="taskname" type="text" class="form-control-plaintext "  value="{{ tasks[x]['name'] }}" readonly></s>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold mt-1">
-                <s><input name="taskdesc" type="text" class="form-control-plaintext" value="{{ tasks[x]['description'] }}" readonly></s>
+                <s><textarea name="taskdesc" class="form-control-plaintext" rows="1" style="text-align:left; overflow:hidden; min-height: 50px; max-height: 265px;" maxlength="300" readonly>{{ tasks[x]['description'] }}</textarea></s>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-1 mt-1 " >
             <button class="btn mt-2 border-light" type="submit" disabled>
@@ -46,10 +46,10 @@
                 <input name="id" type="hidden" value="{{ tasks[x]['task_id'] }}">
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2 fs-4 fw-bold mt-1">
-                <input name="taskname" type="text" class="form-control-plaintext  "  value="{{ tasks[x]['name'] }}" maxlength="50"  required>
+                <input name="taskname" type="text" class="form-control-plaintext  "  value="{{ tasks[x]['name'] }}" maxlength="12"  required>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold mt-1">
-                <input name="taskdesc" type="text" class="form-control-plaintext" value="{{ tasks[x]['description'] }}" maxlength="300" required>
+                <textarea name="taskdesc" rows="1" style="text-align:left; overflow:hidden; min-height: 50px; max-height: 265px;" class="form-control-plaintext" maxlength="300" required>{{ tasks[x]['description'] }}</textarea>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-1 mt-1 " >
             <button class="btn mt-2" type="submit">
@@ -75,10 +75,10 @@
                 <input type="text" class="form-control-plaintext" value=" ?" style="color: #22A39F;" readonly>
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2 fs-4 fw-bold mt-1">
-                <input name="taskname" type="text" class="form-control-plaintext  border-bottom" maxlength="50"  required>
+                <input name="taskname" type="text" class="form-control-plaintext  border-bottom" maxlength="12"  required>
             </div>
-            <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold mt-1">
-                <input name="taskdesc" type="text" class="form-control-plaintext border-bottom" maxlength="300"  required>
+            <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold mt-1 mb-3">
+                <textarea name="taskdesc" rows="1" style="text-align:left; overflow:hidden; min-height: 50px; max-height: 265px;" class="form-control-plaintext border-bottom" maxlength="300" required></textarea>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-1 mt-1 " >
                 <button class="btn mt-2" style="color: #22A39F;" type="submit">
@@ -90,5 +90,3 @@
 
 
 </div>
-
-{% include 'task/footer.html'%}
