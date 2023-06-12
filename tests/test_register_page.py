@@ -5,8 +5,10 @@ from database.models import Users
 
 @pytest.mark.usefixtures
 def test_register_page_credentials(test_client, t_db, user_1):
-    """Testing register_page with correct/incorrect/duplicated credentials"""
+    """Testing register_page with correct/duplicated credentials"""
     with test_client as client:
+        get_page: json = client.get("/register")
+        assert get_page.status_code == 200
         test_name: str = user_1["username"]
         test_pass: str = user_1["password"]
         response: json = client.post("/register",
@@ -28,5 +30,4 @@ def test_register_page_credentials(test_client, t_db, user_1):
                                           "password": test_pass,
                                       },
                                       )
-        assert duplicate.status_code == 200
-        print(duplicate.data)
+        assert duplicate.status_code == 403
