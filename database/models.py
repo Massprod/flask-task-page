@@ -5,6 +5,7 @@ from flask_login import UserMixin
 
 class Users(Base, UserMixin):
     __tablename__ = "users"
-    id = Column(Integer(), primary_key=True)
-    login = Column(String(), nullable=False)
-    token = Column(String(), nullable=True)
+    local_id: int = Column(Integer(), primary_key=True)
+    id: int = Column(Integer(), nullable=False)
+    login: str = Column(String(), nullable=False)
+    token: str = Column(String(), nullable=True)
