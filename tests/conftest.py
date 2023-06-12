@@ -13,6 +13,11 @@ def test_client() -> app:
     yield app.test_client()
 
 
+@pytest.fixture(autouse=True)
+def logout(test_client) -> None:
+    test_client.get("/logout")
+
+
 @pytest.fixture(scope="function")
 def t_db() -> Session:
     """Test DB session"""

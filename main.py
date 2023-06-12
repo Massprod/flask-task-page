@@ -32,28 +32,37 @@ def redirect_main():
 
 @app.route("/login", methods=["GET", "POST"])
 def login_page():
+    """
+    Authorizing registered users, setting session with 10m expire limit.
+
+    If user already registered in back DB, authorizing and adding this user into a local DB.
+
+    regex for -> Username == '^[A-Za-z0-9]{2,50}$' | limited to 50chars
+
+    regex for -> Password == '^[A-Za-z0-9@$!%*#?&]{8,100}$'
+    """
     if current_user.is_authenticated:
         return redirect(url_for("task_page"))
     elif request.method == "POST":
-        db = next(get_session())
-        data = request.form
-        login = requests.post(f"{api_base}token",
-                              headers={"content-type": "application/x-www-form-urlencoded"},
-                              data={"username": data["username"],
-                                    "password": data["password"],
-                                    }
-                              )
+        db: Session = next(get_session())
+        data: json = request.form
+        login: json = requests.post(f"{api_base}token",
+                                    headers={"content-type": "application/x-www-form-urlencoded"},
+                                    data={"username": data["username"],
+                                          "password": data["password"],
+                                          }
+                                    )
         if login.status_code == 200:
             back_data: json = login.json()
             token: str = back_data["access_token"]
             user_id: int = int(back_data["user_id"])
             user_login: str = back_data["login"]
-            update = db.query(Users).filter_by(id=user_id).first()
+            update: Users = db.query(Users).filter_by(id=user_id).first()
             if update is None:
-                back_user = Users(id=user_id,
-                                  login=user_login,
-                                  token=token,
-                                  )
+                back_user: Users = Users(id=user_id,
+                                         login=user_login,
+                                         token=token,
+                                         )
                 db.add(back_user)
                 db.commit()
             else:
@@ -64,23 +73,23 @@ def login_page():
                 )
                 db.commit()
             update = db.query(Users).filter_by(id=user_id).first()
-            login_user(update, remember=True, duration=timedelta(minutes=1))
+            login_user(update, remember=True, duration=timedelta(minutes=10))
             return redirect(url_for("task_page"))
         elif login.status_code == 404:
-            return render_template("login/login.html", name_inc=True)
+            return render_template("login/login.html", name_inc=True), 404
         elif login.status_code == 403:
-            return render_template("login/login.html", pass_inc=True)
+            return render_template("login/login.html", pass_inc=True), 403
     return render_template("login/login.html", copyright=copy_year)
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register_page():
     """
-    Adding new users into front/back db, if Username isn't already taken.
-        regex for -> Username == '^[A-Za-z'\'d]{2,50}$' | limited to 50chars
-                                          !^remove brackets
-        regex for -> Password == '^[A-Za-z'\'d@$!%*#?&]{8,100}$'
-                                          !^remove brackets
+    Adding new users into local/back db, if Username isn't already taken.
+
+    regex for -> Username == '^[A-Za-z0-9]{2,50}$' | limited to 50chars
+
+    regex for -> Password == '^[A-Za-z0-9@$!%*#?&]{8,100}$'
     """
     if current_user.is_authenticated:
         return redirect(url_for("task_page"))
