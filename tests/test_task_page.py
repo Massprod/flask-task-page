@@ -16,7 +16,7 @@ def ruin_token(username: str, database: Session) -> None:
     test_user_id: int = exist.id
     assert exist
     changed_token: str = exist.token[:len(exist.token) // 2]
-    database.query(Users).update(
+    database.query(Users).filter_by(login=username).update(
         {
             Users.token: changed_token
         }
@@ -68,7 +68,7 @@ def test_task_page_add_new_task(test_client, t_db, t_authorize, t_tasks) -> None
 
 @pytest.mark.usefixtures
 def test_task_page_update_existing_tasks(test_client, t_db, t_tasks, t_authorize) -> None:
-    """Testing delete_task page with updating already existing tasks for active User"""
+    """Testing delete_task page with updating already existed tasks for active User"""
     with test_client as client:
         test_name: str = t_authorize["username"]
         # adding test tasks
@@ -106,7 +106,7 @@ def test_task_page_update_existing_tasks(test_client, t_db, t_tasks, t_authorize
                                                      },
                                                      follow_redirects=True,
                                                      )
-            if test_task_id == 19:
+            if test_task_id == 18:
                 assert update_task_response.status_code == 200
                 assert len(update_task_response.history) == 1
                 assert update_task_response.request.path == "/login"
@@ -114,10 +114,66 @@ def test_task_page_update_existing_tasks(test_client, t_db, t_tasks, t_authorize
             assert update_task_response.status_code == 200
             assert len(update_task_response.history) == 1
             assert update_task_response.request.path == "/task"
+            if test_task_id == 17:
+                ruin_token(test_name, t_db)
             test_task_id += 1
             if test_task_status:
                 test_task_status = False
                 continue
             test_task_status = True
-            if test_task_id > 18:
+
+
+@pytest.mark.usefixtures
+def test_task_page_delete_existing_tasks(test_client, t_db, t_tasks, t_authorize) -> None:
+    """Testing delete_task page with deleting already existed tasks for active User"""
+    with test_client as client:
+        test_name: str = t_authorize["username"]
+        # adding test tasks
+        for task_name, task_desc in t_tasks.items():
+            test_task_name: str = task_name
+            test_task_desc: str = task_desc
+            new_task_response: json = client.post("/task/add",
+                                                  data={
+                                                      "taskname": test_task_name,
+                                                      "taskdesc": test_task_desc,
+                                                  },
+                                                  follow_redirects=True,
+                                                  )
+            assert new_task_response.status_code == 200
+            assert len(new_task_response.history) == 1
+            assert new_task_response.request.path == "/task"
+        # Same reason as updating tasks, why there's only redirect will be tested.
+        # Only difference is that we're deleting tasks ->
+        # -> by creating a link to make GET request to /task/delete?{task_id}.
+        # Bad solution, but I used only pure css/html and just wanted to practice with
+        # docker back/front parts, and html forms doesn't give us many options to use.
+        test_task_id: int = 1
+        for _ in range(20):
+            test_delete_response: json = client.get(f"/task/delete?task_id={test_task_id}",
+                                                    follow_redirects=True,
+                                                    )
+            if test_task_id == 18:
+                assert test_delete_response.status_code == 200
+                assert len(test_delete_response.history) == 1
+                assert test_delete_response.request.path == "/login"
+                break
+            assert test_delete_response.status_code == 200
+            assert len(test_delete_response.history) == 1
+            assert test_delete_response.request.path == "/task"
+            if test_task_id == 17:
                 ruin_token(test_name, t_db)
+            test_task_id += 1
+
+
+@pytest.mark.usefixtures
+def test_task_page_access_with_incorrect_token(test_client, t_db, t_authorize) -> None:
+    """Testing GET request to /task with incorrect authorization token"""
+    with test_client as client:
+        test_name: str = t_authorize["username"]
+        ruin_token(test_name, t_db)
+        not_authorized_request: json = client.get("/task",
+                                                  follow_redirects=True,
+                                                  )
+        assert not_authorized_request.status_code == 200
+        assert len(not_authorized_request.history) == 1
+        assert not_authorized_request.request.path == "/login"
