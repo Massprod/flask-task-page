@@ -4,7 +4,10 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 SQLALCHEMY_DB_URL = "sqlite:///database/database.db"
 
-engine = create_engine(SQLALCHEMY_DB_URL)
+engine = create_engine(SQLALCHEMY_DB_URL,
+                       pool_size=10,
+                       max_overflow=-1,  # unlimited que to connect
+                       )
 
 Session = sessionmaker(autoflush=False,
                        autocommit=False,
