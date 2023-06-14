@@ -1,6 +1,7 @@
 import pytest
 import json
 from database.models import Users
+import requests
 
 
 @pytest.mark.usefixtures
@@ -33,3 +34,19 @@ def test_register_page_credentials(test_client, t_db, user_1) -> None:
                                       },
                                       )
         assert duplicate.status_code == 403
+
+
+@pytest.mark.usefixtures
+def test_register_page_with_back_offline(test_client, user_1, mocker) -> None:
+    """Testing /register POST request with back_part Offline"""
+    with test_client as client:
+        test_name: str = user_1["username"]
+        test_pass: str = user_1["password"]
+        mocker.patch("main.requests.post", side_effect=requests.exceptions.ConnectionError)
+        register_response: json = client.post("/register",
+                                              data={
+                                                  "username": test_name,
+                                                  "password": test_pass,
+                                              },
+                                              )
+        assert register_response.status_code == 503
