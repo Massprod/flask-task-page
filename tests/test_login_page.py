@@ -114,3 +114,19 @@ def test_login_for_not_clear_back_db(test_client, t_db, user_1, back_base) -> No
         assert register_redirect.status_code == 200
         assert len(register_redirect.history) == 1
         assert register_redirect.request.path == "/task"
+
+
+@pytest.mark.usefixtures
+def test_login_page_with_back_offline(test_client, user_1, mocker) -> None:
+    """Testing /login POST request with back_part Offline"""
+    with test_client as client:
+        test_name: str = user_1["username"]
+        test_pass: str = user_1["password"]
+        mocker.patch("main.requests.post", side_effect=requests.exceptions.ConnectionError)
+        login_response: json = client.post("/login",
+                                           data={
+                                               "username": test_name,
+                                               "password": test_pass,
+                                           },
+                                           )
+        assert login_response.status_code == 503
