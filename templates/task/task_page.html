@@ -33,7 +33,7 @@
                 <s><input name="taskname" type="text" class="form-control-plaintext "  value="{{ tasks[x]['name'] }}" readonly></s>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold mt-1">
-                <s><textarea name="taskdesc" class="form-control-plaintext" rows="1" style="text-align:left; overflow:hidden; min-height: 42px; max-height: 265px;" maxlength="300" readonly>{{ tasks[x]['description'] }}</textarea></s>
+                <s><textarea name="taskdesc" class="form-control-plaintext" rows="1" style="text-align:left; overflow:hidden; min-height: 50px; max-height: 265px;" maxlength="300" readonly>{{ tasks[x]['description'] }}</textarea></s>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-1 mt-1 " >
             <button class="btn mt-2 border-light" type="submit" disabled>
@@ -46,10 +46,10 @@
                 <input name="id" type="hidden" value="{{ tasks[x]['task_id'] }}">
             </div>
             <div class="col-lg-2 col-md-2 col-sm-2 fs-4 fw-bold mt-1">
-                <input name="taskname" type="text" class="form-control-plaintext  "  value="{{ tasks[x]['name'] }}" maxlength="14"  required>
+                <input name="taskname" type="text" class="form-control-plaintext border-bottom"  value="{{ tasks[x]['name'] }}" maxlength="14"  required>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold mt-1">
-                <textarea name="taskdesc" rows="1" style="text-align:left; overflow:hidden; min-height: 42px; max-height: 265px;" class="form-control-plaintext" maxlength="300" required>{{ tasks[x]['description'] }}</textarea>
+                <textarea name="taskdesc" rows="1" style="text-align:left; overflow:hidden; min-height: 50px; max-height: 265px;" class="form-control-plaintext border-bottom" maxlength="300" required>{{ tasks[x]['description'] }}</textarea>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-1 mt-1 ">
             <button class="btn mt-2" type="submit">
@@ -78,7 +78,7 @@
                 <input name="taskname" type="text" class="form-control-plaintext  border-bottom" maxlength="14"  required>
             </div>
             <div class="col-lg-6 col-md-6 col-sm-6 fs-4 fw-bold mt-1 mb-3">
-                <textarea name="taskdesc" rows="1" style="text-align:left; overflow:hidden; min-height: 42px; max-height: 265px;" class="form-control-plaintext border-bottom" maxlength="300" required></textarea>
+                <textarea name="taskdesc" rows="1" style="text-align:left; overflow:hidden; min-height: 50px; max-height: 265px;" class="form-control-plaintext border-bottom" maxlength="300" required></textarea>
             </div>
             <div class="col-lg-1 col-md-1 col-sm-1 mt-1 " >
                 <button name="new_task" class="btn mt-2" style="color: #22A699;" type="submit">
