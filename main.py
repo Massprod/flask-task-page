@@ -34,7 +34,7 @@ def user_loader(id):
 
     @token - lastly assigned authorization token from back.
     :returns:
-    Users - database model
+    Users - database model/table
     """
     db: Session = next(get_session())
     return db.query(Users).filter_by(id=id).first()
@@ -134,7 +134,7 @@ def register_page():
 @login_required
 def task_page():
     """
-    Showing every existing task for a currently active User.
+    Display every existing task for a currently active User.
 
     Loaded from a back DB.
     """
@@ -151,20 +151,29 @@ def task_page():
 @app.route("/task/delete", methods=["GET", "POST"])
 @login_required
 def delete_task():
-    token = current_user.token
+    """
+    Delete/Update already existed tasks for the active User.
+
+    Redirecting to -> /task , with all updated tasks of a User on success.
+
+    Redirecting to -> /login , if current User doesn't have authorized token.
+
+    No limits on what symbols can be used for a taskname or taskdesc.
+    """
+    token: str = current_user.token
     if request.method == "GET":
-        task_id = request.args["task_id"]
-        response = requests.delete(f"{api_base}task/{task_id}",
-                                   headers={"Authorization": f"Bearer {token}"},
-                                   )
+        task_id: str = request.args["task_id"]
+        response: json = requests.delete(f"{api_base}task/{task_id}",
+                                         headers={"Authorization": f"Bearer {token}"},
+                                         )
         if response.status_code == 401:
             logout_user()
             return redirect(url_for("login_page"))
         return redirect(url_for('task_page'))
-    task_id = request.form["id"]
-    new_name = request.form["taskname"]
-    new_desc = request.form["taskdesc"]
-    new_status = request.form["status"]
+    task_id: str = request.form["id"]
+    new_name: str = request.form["taskname"]
+    new_desc: str = request.form["taskdesc"]
+    new_status: str = request.form["status"]
     response = requests.put(f"{api_base}task/{task_id}",
                             json={"name": new_name,
                                   "description": new_desc,
@@ -183,7 +192,7 @@ def add_new_task():
     """
     Adding new task into a back DB for the currently active User.
 
-    Redirecting to -> /task , with all User tasks on success.
+    Redirecting to -> /task , with all tasks of a User on success.
 
     Redirecting to -> /login , if current User doesn't have authorized token.
 
@@ -209,9 +218,6 @@ def add_new_task():
 @app.route("/logout", methods=["GET"])
 @login_required
 def logout_page():
-    """Logout/Redirect to -> /login , currently active User."""
+    """Logout and redirect to -> /login , currently active User."""
     logout_user()
     return redirect(url_for("login_page"))
-
-# if __name__ == "__main__":
-#     app.run(host="0.0.0.0", port=5050)
