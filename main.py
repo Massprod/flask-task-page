@@ -59,10 +59,10 @@ def login_page():
             user_login: str = back_data["login"]
             update: Users = db.query(Users).filter_by(id=user_id).first()
             if update is None:
-                back_user: Users = Users(id=user_id,
-                                         login=user_login,
-                                         token=token,
-                                         )
+                back_user: Users = Users()
+                back_user.id = user_id
+                back_user.login = user_login
+                back_user.token = token
                 db.add(back_user)
                 db.commit()
             else:
@@ -103,9 +103,9 @@ def register_page():
                                            )
         if register.status_code == 200:
             registered: json = register.json()
-            new_user: Users = Users(id=registered["id"],
-                                    login=registered["login"],
-                                    )
+            new_user: Users = Users()
+            new_user.id = registered["id"]
+            new_user.login = registered["login"]
             db.add(new_user)
             db.commit()
             return redirect(url_for("login_page"))
@@ -117,10 +117,14 @@ def register_page():
 @app.route("/task", methods=["GET"])
 @login_required
 def task_page():
-    token = current_user.token
-    tasks = requests.get(f"{api_base}task/all",
-                         headers={"Authorization": f"Bearer {token}"},
-                         )
+    """
+    Showing every existing task for a currently active User.
+    Loaded from a back DB.
+    """
+    token: str = current_user.token
+    tasks: json = requests.get(f"{api_base}task/all",
+                               headers={"Authorization": f"Bearer {token}"},
+                               )
     if tasks.status_code == 401:
         logout_user()
         return redirect(url_for("login_page"))
@@ -159,17 +163,26 @@ def delete_task():
 
 @app.route("/task/add", methods=["POST"])
 def add_new_task():
-    token = current_user.token
-    task_name = request.form["taskname"]
-    task_desc = request.form["taskdesc"]
-    task_status = False
-    response = requests.post(f"{api_base}task/new",
-                             json={"name": task_name,
-                                   "description": task_desc,
-                                   "status": task_status,
-                                   },
-                             headers={"Authorization": f"Bearer {token}"}
-                             )
+    """
+    Adding new task into a back DB for the currently active User.
+
+    Redirecting to - /task , with all User tasks on success.
+
+    Redirecting to - /login , if current User doesn't have authorized token.
+
+    No limits on what symbols can be used for a taskname or taskdesc.
+    """
+    token: str = current_user.token
+    task_name: str = request.form["taskname"]
+    task_desc: str = request.form["taskdesc"]
+    task_status: bool = False
+    response: json = requests.post(f"{api_base}task/new",
+                                   json={"name": task_name,
+                                         "description": task_desc,
+                                         "status": task_status,
+                                         },
+                                   headers={"Authorization": f"Bearer {token}"}
+                                   )
     if response.status_code == 401:
         logout_user()
         return redirect(url_for("login_page"))
@@ -182,6 +195,5 @@ def logout_page():
     logout_user()
     return redirect(url_for("login_page"))
 
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5050, debug=True)
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5050)
