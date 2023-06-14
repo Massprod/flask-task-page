@@ -30,6 +30,11 @@
                 <button class="btn btn-primary text-uppercase btn-light w-50 fs-5 fw-bold" id="signUp" type="submit">Create New</button>
         </div>
     </form>
+    {% if back_down %}
+        <div class="row text-center fw-bold text-warning mt-3">
+                <h3>Service is Offline. Sorry.</h3>
+        </div>
+    {% endif %}
 </div>
 </body>
 {% include 'login/footer.html'%}
