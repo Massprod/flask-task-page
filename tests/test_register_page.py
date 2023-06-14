@@ -9,6 +9,7 @@ def test_register_page_credentials(test_client, t_db, user_1):
     with test_client as client:
         get_page: json = client.get("/register")
         assert get_page.status_code == 200
+        # username not taken
         test_name: str = user_1["username"]
         test_pass: str = user_1["password"]
         response: json = client.post("/register",
@@ -24,6 +25,7 @@ def test_register_page_credentials(test_client, t_db, user_1):
         exist: Users | None = t_db.query(Users).filter_by(login=test_name).first()
         assert exist
         assert exist.login == test_name
+        # username already taken
         duplicate: json = client.post("/register",
                                       data={
                                           "username": test_name,
