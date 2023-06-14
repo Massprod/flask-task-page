@@ -62,12 +62,15 @@ def login_page():
     elif request.method == "POST":
         db: Session = next(get_session())
         data: json = request.form
-        login: json = requests.post(f"{api_base}token",
-                                    headers={"content-type": "application/x-www-form-urlencoded"},
-                                    data={"username": data["username"],
-                                          "password": data["password"],
-                                          }
-                                    )
+        try:
+            login: json = requests.post(f"{api_base}token",
+                                        headers={"content-type": "application/x-www-form-urlencoded"},
+                                        data={"username": data["username"],
+                                              "password": data["password"],
+                                              }
+                                        )
+        except requests.exceptions.ConnectionError:
+            return render_template("login/login.html", back_down=True, copyright=copy_year), 503
         if login.status_code == 200:
             back_data: json = login.json()
             token: str = back_data["access_token"]
@@ -112,11 +115,14 @@ def register_page():
     elif request.method == "POST":
         db: Session = next(get_session())
         data: json = request.form
-        register: Response = requests.post(f"{api_base}user/new",
-                                           json={"login": data["username"],
-                                                 "password": data["password"],
-                                                 }
-                                           )
+        try:
+            register: Response = requests.post(f"{api_base}user/new",
+                                               json={"login": data["username"],
+                                                     "password": data["password"],
+                                                     }
+                                               )
+        except requests.exceptions.ConnectionError:
+            return render_template("login/register.html", back_down=True, copyright=copy_year), 503
         if register.status_code == 200:
             registered: json = register.json()
             new_user: Users = Users()
@@ -188,6 +194,7 @@ def delete_task():
 
 
 @app.route("/task/add", methods=["POST"])
+@login_required
 def add_new_task():
     """
     Adding new task into a back DB for the currently active User.
