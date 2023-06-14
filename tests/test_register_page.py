@@ -4,7 +4,7 @@ from database.models import Users
 
 
 @pytest.mark.usefixtures
-def test_register_page_credentials(test_client, t_db, user_1):
+def test_register_page_credentials(test_client, t_db, user_1) -> None:
     """Testing register_page with correct/duplicated credentials"""
     with test_client as client:
         get_page: json = client.get("/register")

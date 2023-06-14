@@ -5,7 +5,7 @@ import requests
 
 
 @pytest.mark.usefixtures
-def test_login_page_credentials(test_client, t_db, user_1):
+def test_login_page_credentials(test_client, t_db, user_1) -> None:
     """Testing login_page with correct/incorrect credentials, extra test for logout"""
     with test_client as client:
         # "/" redirect
@@ -78,7 +78,7 @@ def test_login_page_credentials(test_client, t_db, user_1):
 
 
 @pytest.mark.usefixtures
-def test_login_for_not_clear_back_db(test_client, t_db, user_1, back_base):
+def test_login_for_not_clear_back_db(test_client, t_db, user_1, back_base) -> None:
     """Testing the case when our back DB having some pre_recorded users, and we're starting a new local DB"""
     with test_client as client:
         back_base: str = back_base

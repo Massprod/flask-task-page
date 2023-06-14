@@ -53,12 +53,12 @@ def user_1() -> dict[str, str]:
 def t_tasks() -> dict[str, str]:
     """Test tasks to add/update"""
     test_tasks: dict[str, str] = {}
-    for _ in range(0, 20):
+    for _ in range(20):
         task_name: str = ""
-        for _ in range(0, 13):
+        for _ in range(13):
             task_name += choice(ascii_letters)
         task_desc: str = ""
-        for _ in range(0, 300):
+        for _ in range(300):
             task_desc += choice(ascii_letters)
         test_tasks[task_name] = task_desc
     return test_tasks
