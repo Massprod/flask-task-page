@@ -8,6 +8,13 @@ import requests
 def test_login_page_credentials(test_client, t_db, user_1):
     """Testing login_page with correct/incorrect credentials, extra test for logout"""
     with test_client as client:
+        # "/" redirect
+        login_redirect: json = client.get("/",
+                                          follow_redirects=True,
+                                          )
+        assert login_redirect.status_code == 200
+        assert len(login_redirect.history) == 1
+        assert login_redirect.request.path == "/login"
         get_page: json = client.get("/login")
         assert get_page.status_code == 200
         test_name: str = user_1["username"]
@@ -71,10 +78,10 @@ def test_login_page_credentials(test_client, t_db, user_1):
 
 
 @pytest.mark.usefixtures
-def test_login_for_not_clear_back_db(test_client, t_db, user_1):
+def test_login_for_not_clear_back_db(test_client, t_db, user_1, back_base):
     """Testing the case when our back DB having some pre_recorded users, and we're starting a new local DB"""
     with test_client as client:
-        back_base: str = "http://localhost:5000/"
+        back_base: str = back_base
         test_name: str = user_1["username"]
         test_pass: str = user_1["password"]
         back_record: json = requests.post(f"{back_base}user/new",
