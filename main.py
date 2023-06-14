@@ -21,12 +21,28 @@ copy_year: str = datetime.utcnow().strftime("%Y")
 
 @login_manager.user_loader
 def user_loader(id):
-    db = next(get_session())
+    """
+    Loading DB object of a user with given id.
+
+    DB object holds:
+
+    @local_id - id of a user on local db.
+
+    @id - id of a user on back db.
+
+    @login - username of a user on back/local db.
+
+    @token - lastly assigned authorization token from back.
+    :returns:
+    Users - database model
+    """
+    db: Session = next(get_session())
     return db.query(Users).filter_by(id=id).first()
 
 
 @app.route("/", methods=["GET"])
 def redirect_main():
+    """Redirecting from basic DomainName to -> /login page."""
     return redirect(url_for("login_page"))
 
 
@@ -39,7 +55,7 @@ def login_page():
 
     regex for -> Username == '^[A-Za-z0-9]{2,50}$' | limited to 50chars
 
-    regex for -> Password == '^[A-Za-z0-9@$!%*#?&]{8,100}$'
+    regex for -> Password == '^[A-Za-z0-9@$!%*#?&]{8,100}$' | limited to 8-100chars
     """
     if current_user.is_authenticated:
         return redirect(url_for("task_page"))
@@ -119,6 +135,7 @@ def register_page():
 def task_page():
     """
     Showing every existing task for a currently active User.
+
     Loaded from a back DB.
     """
     token: str = current_user.token
@@ -166,9 +183,9 @@ def add_new_task():
     """
     Adding new task into a back DB for the currently active User.
 
-    Redirecting to - /task , with all User tasks on success.
+    Redirecting to -> /task , with all User tasks on success.
 
-    Redirecting to - /login , if current User doesn't have authorized token.
+    Redirecting to -> /login , if current User doesn't have authorized token.
 
     No limits on what symbols can be used for a taskname or taskdesc.
     """
@@ -192,6 +209,7 @@ def add_new_task():
 @app.route("/logout", methods=["GET"])
 @login_required
 def logout_page():
+    """Logout/Redirect to -> /login , currently active User."""
     logout_user()
     return redirect(url_for("login_page"))
 
