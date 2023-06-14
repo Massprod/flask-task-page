@@ -5,6 +5,7 @@ from random import choice
 from database.database import get_session
 from sqlalchemy.orm import Session
 from random import randint
+import json
 
 
 @pytest.fixture(scope="session")
@@ -15,7 +16,14 @@ def test_client() -> app:
 
 @pytest.fixture(autouse=True)
 def logout(test_client) -> None:
+    """Logout after every test with active user"""
     test_client.get("/logout")
+
+
+@pytest.fixture(scope="function")
+def back_base() -> str:
+    """Back URL"""
+    return "http://localhost:5000/"
 
 
 @pytest.fixture(scope="function")
@@ -54,3 +62,26 @@ def t_tasks() -> dict[str, str]:
             task_desc += choice(ascii_letters)
         test_tasks[task_name] = task_desc
     return test_tasks
+
+
+@pytest.fixture(scope="function")
+def t_authorize(test_client, user_1) -> dict[str, str]:
+    """Create and login user to test with"""
+    with test_client as client:
+        test_name: str = user_1["username"]
+        test_pass: str = user_1["password"]
+        test_register: json = client.post("/register",
+                                          data={
+                                              "username": test_name,
+                                              "password": test_pass,
+                                          },
+                                          )
+        assert test_register.status_code == 302
+        test_login: json = client.post("/login",
+                                       data={
+                                           "username": test_name,
+                                           "password": test_pass,
+                                       },
+                                       )
+        assert test_login.status_code == 302
+        return user_1.copy()
