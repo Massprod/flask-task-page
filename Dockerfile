@@ -11,7 +11,6 @@ RUN python -m pip install -r requirements.txt
 
 COPY . .
 
-
 EXPOSE 5000:5000/tcp
 
-CMD ["gunicorn", "main:app", "--workers 3",  "-b 0.0.0.0:5000"]
+CMD ["gunicorn", "--workers=2", "-b 0.0.0.0:5000", "main:app"]

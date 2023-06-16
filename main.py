@@ -7,10 +7,11 @@ from datetime import timedelta, datetime
 import json
 from os import getenv
 
-api_base = getenv("TASK_API")
 
 app = Flask(__name__)
 app.secret_key = "VerySecret!2VerySecret"
+
+api_base = getenv("TASK_API")
 
 login_manager = LoginManager(app=app)
 login_manager.login_view = "login_page"
