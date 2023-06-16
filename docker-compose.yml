@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  task-page:
+    environment:
+      - TASK_API=http://task-api:5050/
+    container_name: task-page
+    build: .
+    ports:
+      - "5000:5000"
+    networks:
+      - local_duo
+
+  task-api:
+    container_name: task-api
+    build: ../task_page_fastapi/
+    ports:
+      - "5050:5050"
+    networks:
+      - local_duo
+
+networks:
+  local_duo:
