@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE 5000:5000/tcp
 
-CMD ["gunicorn", "--workers=2", "-b 0.0.0.0:5000", "main:app"]
+CMD ["gunicorn", "--workers=3", "-b 0.0.0.0:5000", "main:app"]
