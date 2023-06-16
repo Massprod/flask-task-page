@@ -5,8 +5,9 @@ from database.database import Base, engine, get_session, Session
 import requests
 from datetime import timedelta, datetime
 import json
+from os import getenv
 
-api_base = "http://localhost:5000/"
+api_base = getenv("TASK_API")
 
 app = Flask(__name__)
 app.secret_key = "VerySecret!2VerySecret"
@@ -67,7 +68,8 @@ def login_page():
                                         headers={"content-type": "application/x-www-form-urlencoded"},
                                         data={"username": data["username"],
                                               "password": data["password"],
-                                              }
+                                              },
+                                        timeout=10,
                                         )
         except requests.exceptions.ConnectionError:
             return render_template("login/login.html", back_down=True, copyright=copy_year), 503

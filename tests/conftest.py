@@ -6,6 +6,7 @@ from database.database import get_session
 from sqlalchemy.orm import Session
 from random import randint
 import json
+from os import getenv
 
 
 @pytest.fixture(scope="session")
@@ -23,7 +24,7 @@ def logout(test_client) -> None:
 @pytest.fixture(scope="function")
 def back_base() -> str:
     """Back URL"""
-    return "http://localhost:5000/"
+    return getenv("TASK_API")
 
 
 @pytest.fixture(scope="function")
